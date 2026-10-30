@@ -1,0 +1,22 @@
+name: Board Notif
+
+on:
+  issues:
+    types: [opened, closed, reopened, assigned]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kirim ke Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_BOARD_WEBHOOK }}
+          ACTOR: ${{ github.actor }}
+          ACTION: ${{ github.event.action }}
+          TITLE: ${{ github.event.issue.title }}
+          URL: ${{ github.event.issue.html_url }}
+        run: |
+          MSG="🗂️ **$ACTOR** — kartu $ACTION: $TITLE $URL"
+          curl -sS -f -H "Content-Type: application/json" \
+            -d "$(jq -n --arg c "$MSG" '{content:$c}')" \
+            "$WEBHOOK"
